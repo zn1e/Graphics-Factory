@@ -8,6 +8,8 @@ Run the command `sudo apt install cmake`.
 ### Install OpenGL development libraries and GLUT
 - Now we have to install the OpenGL and GLUT libraries. <br>
 Enter `sudo apt install libgl1-mesa-dev libglu1-mesa-dev freeglut3-dev` and `sudo apt install freeglut3-dev libglfw3-dev`.
+### Running CMake
+- Run `cmake ..`
 ### Compiling file
 - It is recommended to include `-Wall -Werror` to avoid compiling issuess. <br>
 `g++ -Wall -Werror <program>.cpp -o <desired_name>`.
