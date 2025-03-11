@@ -18,7 +18,6 @@ using namespace std;
 float *x, *y, *z;	// vertex coordinate arrays
 int *t1, *t2, *t3;	// triangles
 int nvert, ntri;	// total number of vertices and triangles
-float cam_hgt = 1; 
 
 // Loads mesh data in OFF format   
 void loadMeshFile(const char* fname) {
@@ -58,22 +57,27 @@ void loadMeshFile(const char* fname) {
 	cout << " File successfully read." << endl;
 }
 
-// Draws a grid of lines on the floor plane 
+//-- Draw a floor plane ----------------------------------------------------
 void drawFloor() {
-	glColor3f(0., 0.5, 0.);			//Floor colour
-	for (float i = -50.; i <= 50.; i++) {
-		glBegin(GL_LINES);			//A set of grid lines on the xz-plane
-			glVertex3f(-50., 0., i);
-			glVertex3f( 50., 0., i);
-			glVertex3f(i, 0., -50.);
-			glVertex3f(i, 0.,  50.);
-		glEnd();
+	bool flag = false;
+
+	glBegin(GL_QUADS);
+	glNormal3f(0, 1, 0);
+	for (int x = -400; x <= 400; x += 20) {
+		for (int z = -400; z <= 400; z += 20) {
+			if (flag) glColor3f(0.6, 1.0, 0.8);
+			else 	  glColor3f(0.8, 1.0, 0.6);
+			glVertex3f(x, 0, z);
+			glVertex3f(x, 0, z+20);
+			glVertex3f(x+20, 0, z+20);
+			glVertex3f(x+20, 0, z);
+			flag = !flag;
+		}
 	}
+	glEnd();
 }
 
-// Display:
-// This is the main display module containing function calls for generating
-// the scene.
+// Main display module that generates the scene.
 void display() {
 	float lpos[4] = {100., 100., 100., 1.};	//light's position
 
@@ -81,14 +85,14 @@ void display() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	gluLookAt(0., 10, 0., 0., 0., 0., 0., 1., 0.);
+	gluLookAt(0., 50, 150., 0., 0., 0., 0., 1., 0.);
 	glLightfv(GL_LIGHT0, GL_POSITION, lpos);	//set light position
 
 	drawFloor();
 
 	glFlush();
 }
-// Initialize OpenGL parameters 
+// Initialize OpenGL parameters  
 void initialize() {
 	// loadMeshFile("Cannon.off");		//Specify mesh file name here
 	glClearColor(1., 1., 1., 1.);	//Background colour
@@ -108,7 +112,7 @@ void initialize() {
 int main(int argc, char **argv) {
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_DEPTH);
-	glutInitWindowSize(1920, 1080);
+	glutInitWindowSize(1280, 720);
 	glutInitWindowPosition(0, 0);
 	glutCreateWindow("Graphics Factory");
 	initialize();
