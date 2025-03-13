@@ -8,104 +8,94 @@
 // ---------------------------------------------------------
 
 #include <iostream>
-#include <fstream>
-#include <climits>
+#include <cmath>
 #include <GL/freeglut.h>
+#include "loadTGA.h"
+
 using namespace std;
 
+#define TO_RADIANS 3.14159/180.
 
-// Global variables
-float *x, *y, *z;	// vertex coordinate arrays
-int *t1, *t2, *t3;	// triangles
-int nvert, ntri;	// total number of vertices and triangles
+GLuint txId[2]; // texture ids
 
-// Loads mesh data in OFF format   
-void loadMeshFile(const char* fname) {
-	ifstream fp_in;
-	int num, nedge;
+// Define global variables
+float eye_x, eye_z, look_x, look_z = -1, angle = 0; // camera params
 
-	fp_in.open(fname, ios::in);
-	if(!fp_in.is_open()) {
-		cout << "Error opening mesh file" << endl;
-		exit(1);
+// Load and bind textures
+void loadTexture() {
+	glGenTextures(2, txId); // Create 2 texture ids
+
+	glBindTexture(GL_TEXTURE_2D, txId[0]);	//Use this texture
+	loadTGA("floor.tga");
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);	//Set texture parameters
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);	
+
+	glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
+}
+
+// Keyboard key event call back
+void keyboard(unsigned char key, int x, int y) {
+	switch (key)
+	{
+		case 'a': angle -= 5; break; // turn direction
+		case 'd': angle += 5; break;
+		case 's': // move backward
+			eye_x -= 0.1 * sin(angle * TO_RADIANS);
+			eye_z += 0.1 * cos(angle * TO_RADIANS);
+			break;
+		case 'w': // move forward
+			eye_x += 0.1 *sin(angle * TO_RADIANS);
+			eye_z -= 0.1 * cos(angle * TO_RADIANS);
+			break;
 	}
 
-	fp_in.ignore(INT_MAX, '\n');		// ignore first line
-	fp_in >> nvert >> ntri >> nedge;	// read number of vertices, polygons, edges
-
-	x = new float[nvert];				// create arrays
-	y = new float[nvert];
-	z = new float[nvert];
-
-	t1 = new int[ntri];
-	t2 = new int[ntri];
-	t3 = new int[ntri];
-
-	for(int i = 0; i < nvert; i++) {	// read vertex list 
-		fp_in >> x[i] >> y[i] >> z[i];
-	}
-
-	for(int i = 0; i < ntri; i++) {	// read polygon list 
-		fp_in >> num >> t1[i] >> t2[i] >> t3[i];
-		if(num != 3) {
-			cout << "ERROR: Polygon with index " << i  << " is not a triangle." << endl; // not a triangle!!
-			exit(1);
-		}
-	}
-
-	fp_in.close();
-	cout << " File successfully read." << endl;
+	look_x = eye_x + 100 * sin(angle * TO_RADIANS);
+	look_z = eye_z - 100 * cos(angle * TO_RADIANS);
+	glutPostRedisplay();
 }
 
 //-- Draw a floor plane ----------------------------------------------------
 void drawFloor() {
-	bool flag = false;
+	glBindTexture(GL_TEXTURE_2D, txId[0]);  //replace with a texture
 
 	glBegin(GL_QUADS);
-	glNormal3f(0, 1, 0);
-	for (int x = -400; x <= 400; x += 20) {
-		for (int z = -400; z <= 400; z += 20) {
-			if (flag) glColor3f(0.6, 1.0, 0.8);
-			else 	  glColor3f(0.8, 1.0, 0.6);
-			glVertex3f(x, 0, z);
-			glVertex3f(x, 0, z+20);
-			glVertex3f(x+20, 0, z+20);
-			glVertex3f(x+20, 0, z);
-			flag = !flag;
-		}
-	}
+		glTexCoord2f(0.0f, 20.0f);
+		glVertex3f(-30, -1, -30);
+
+		glTexCoord2f(0.0f, 0.0f);
+		glVertex3f(-30, -1, 30);
+
+		glTexCoord2f(20.0f, 0.0f);
+		glVertex3f(30, -1, 30);
+
+		glTexCoord2f(20.0f, 20.0f);
+		glVertex3f(30, -1, -30);
 	glEnd();
 }
 
 // Main display module that generates the scene.
 void display() {
-	float lpos[4] = {100., 100., 100., 1.};	//light's position
-
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);	//GL_LINE = Wireframe;   GL_FILL = Solid
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
+// glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);	//GL_LINE = Wireframe;   GL_FILL = Solid
+
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	gluLookAt(0., 50, 150., 0., 0., 0., 0., 1., 0.);
-	glLightfv(GL_LIGHT0, GL_POSITION, lpos);	//set light position
-
-	drawFloor();
-
-	glFlush();
-}
-// Initialize OpenGL parameters  
-void initialize() {
-	// loadMeshFile("Cannon.off");		//Specify mesh file name here
-	glClearColor(1., 1., 1., 1.);	//Background colour
-
-	glEnable(GL_LIGHTING);			//Enable OpenGL states
-	glEnable(GL_LIGHT0);
-	glEnable(GL_COLOR_MATERIAL);
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_NORMALIZE);
+	gluLookAt(eye_x, 0., eye_z, look_x, 0., look_z, 0., 1., 0.);
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(60., 1., 50., 1000.);  //The camera view volume  
+	gluPerspective(45., 1., 1., 100.);  //The camera view volume  
+	
+	drawFloor();
+
+	glutSwapBuffers();
+}
+// Initialize OpenGL parameters  
+void initialize() {
+	loadTexture();
+	glEnable(GL_TEXTURE_2D);
+	glClearColor(0., 1., 1., 1.);	//Background colour
+	glEnable(GL_DEPTH_TEST);
 }
 
 //-- Main: Initialize glut window and register call backs ------------------
@@ -119,6 +109,7 @@ int main(int argc, char **argv) {
 
 	glutDisplayFunc(display);
 	// glutSpecialFunc(special);
+	glutKeyboardFunc(keyboard);
 	glutMainLoop();
 	return 0; 
 }
