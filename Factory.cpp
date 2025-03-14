@@ -21,6 +21,7 @@ GLuint txId[2]; // texture ids
 
 // Define global variables
 float eye_x, eye_z, look_x, look_z, angle = 0; // camera params
+bool toggle_wireframe = 0;
 
 // Load and bind textures
 void loadTexture() {
@@ -48,6 +49,16 @@ void keyboard(unsigned char key, int x, int y) {
 			eye_x += 0.1 * sin(angle * TO_RADIANS);
 			eye_z -= 0.1 * cos(angle * TO_RADIANS);
 			break;
+		case 'q':
+			if (!toggle_wireframe) {
+				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+				toggle_wireframe = 1;
+				break;
+			} else {
+				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+				toggle_wireframe = 0;
+				break;
+			}
 	}
 
 	look_x = eye_x + 100 * sin(angle * TO_RADIANS);
