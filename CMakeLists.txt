@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8...3.5)
 
 project(Factory)
 
-add_executable(Factory.out Factory.cpp)
+add_executable(Factory.out Factory.cpp Models.cpp)
 
 
 set(OpenGL_GL_PREFERENCE LEGACY)

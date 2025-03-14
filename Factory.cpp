@@ -11,6 +11,7 @@
 #include <cmath>
 #include <GL/freeglut.h>
 #include "loadTGA.h"
+#include "Models.h"
 
 using namespace std;
 
@@ -19,7 +20,7 @@ using namespace std;
 GLuint txId[2]; // texture ids
 
 // Define global variables
-float eye_x, eye_z, look_x, look_z = -1, angle = 0; // camera params
+float eye_x, eye_z, look_x, look_z, angle = 0; // camera params
 
 // Load and bind textures
 void loadTexture() {
@@ -44,7 +45,7 @@ void keyboard(unsigned char key, int x, int y) {
 			eye_z += 0.1 * cos(angle * TO_RADIANS);
 			break;
 		case 'w': // move forward
-			eye_x += 0.1 *sin(angle * TO_RADIANS);
+			eye_x += 0.1 * sin(angle * TO_RADIANS);
 			eye_z -= 0.1 * cos(angle * TO_RADIANS);
 			break;
 	}
@@ -55,20 +56,20 @@ void keyboard(unsigned char key, int x, int y) {
 }
 
 //-- Draw a floor plane ----------------------------------------------------
-void drawFloor() {
+void floor() {
 	glBindTexture(GL_TEXTURE_2D, txId[0]);  //replace with a texture
 
 	glBegin(GL_QUADS);
-		glTexCoord2f(0.0f, 20.0f);
+		glTexCoord2f(0.0f, 16.0f);
 		glVertex3f(-30, -1, -30);
 
 		glTexCoord2f(0.0f, 0.0f);
 		glVertex3f(-30, -1, 30);
 
-		glTexCoord2f(20.0f, 0.0f);
+		glTexCoord2f(16.0f, 0.0f);
 		glVertex3f(30, -1, 30);
 
-		glTexCoord2f(20.0f, 20.0f);
+		glTexCoord2f(16.0f, 16.0f);
 		glVertex3f(30, -1, -30);
 	glEnd();
 }
@@ -84,26 +85,36 @@ void display() {
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(45., 1., 1., 100.);  //The camera view volume  
+	gluPerspective(45., 1., 1., 500.);  //The camera view volume  
 	
-	drawFloor();
+	glDisable(GL_LIGHTING);
+	floor();
+
+	pillar();
+	glEnable(GL_LIGHTING);
 
 	glutSwapBuffers();
 }
+
 // Initialize OpenGL parameters  
 void initialize() {
+	glClearColor(0., 1., 1., 1.);	//Background colour
+	
 	loadTexture();
 	glEnable(GL_TEXTURE_2D);
-	glClearColor(0., 1., 1., 1.);	//Background colour
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_LIGHTING);
+	glEnable(GL_COLOR_MATERIAL);
+	glEnable(GL_NORMALIZE);
+
 }
 
-//-- Main: Initialize glut window and register call backs ------------------
+// Main: Initialize glut window and register call backs 
 int main(int argc, char **argv) {
 	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_SINGLE | GLUT_DEPTH);
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 	glutInitWindowSize(1280, 720);
-	glutInitWindowPosition(0, 0);
+	glutInitWindowPosition((glutGet(GLUT_SCREEN_WIDTH) - 1280)/2, (glutGet(GLUT_SCREEN_HEIGHT) - 480)/2); // center window with 1280 x 480 size
 	glutCreateWindow("Graphics Factory");
 	initialize();
 
