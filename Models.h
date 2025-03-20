@@ -7,4 +7,8 @@
 //
 // ---------------------------------------------------------
 
-void pillar();
+//void pillar();
+
+void conveyor();
+void update();
+void loadTexture();

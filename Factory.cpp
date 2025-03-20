@@ -20,10 +20,10 @@ using namespace std;
 GLuint txId[2]; // texture ids
 
 // Define global variables
-float eye_x, eye_z, look_x, look_z, angle = 0; // camera params
+float eye_x=0, eye_z=15, look_x=0, look_z=0., angle = 0; // camera params
 bool toggle_wireframe = 0;
 
-// Load and bind textures
+//Load and bind textures
 void loadTexture() {
 	glGenTextures(2, txId); // Create 2 texture ids
 
@@ -34,6 +34,7 @@ void loadTexture() {
 
 	glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
 }
+
 
 // Keyboard key event call back
 void keyboard(unsigned char key, int x, int y) {
@@ -68,56 +69,57 @@ void keyboard(unsigned char key, int x, int y) {
 
 //-- Draw a floor plane ----------------------------------------------------
 void floor() {
-	glBindTexture(GL_TEXTURE_2D, txId[0]);  //replace with a texture
 
-	glBegin(GL_QUADS);
-		glTexCoord2f(0.0f, 16.0f);
-		glVertex3f(-30, -1, -30);
+	glColor3f(0., 0.5, 0.);     //Floor colour
 
-		glTexCoord2f(0.0f, 0.0f);
-		glVertex3f(-30, -1, 30);
-
-		glTexCoord2f(16.0f, 0.0f);
-		glVertex3f(30, -1, 30);
-
-		glTexCoord2f(16.0f, 16.0f);
-		glVertex3f(30, -1, -30);
-	glEnd();
+	for(int i = -50; i <= 50; i++)  {
+		glBegin(GL_LINES);      //A set of grid lines on the xz-plane
+			glVertex3f(-50., -0.75, i);
+			glVertex3f( 50., -0.75, i);
+			glVertex3f(i, -0.75, -50.);
+			glVertex3f(i, -0.75,  50.);
+		glEnd();
+	}
 }
 
 // Main display module that generates the scene.
 void display() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
-// glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);	//GL_LINE = Wireframe;   GL_FILL = Solid
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(45., 1., 1., 500.);  //The camera view volume  
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	gluLookAt(eye_x, 0., eye_z, look_x, 0., look_z, 0., 1., 0.);
 
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(45., 1., 1., 500.);  //The camera view volume  
-	
 	glDisable(GL_LIGHTING);
-	floor();
+	// floor();
 
-	pillar();
+	// pillar();
 	glEnable(GL_LIGHTING);
+	conveyor();
 
 	glutSwapBuffers();
 }
 
 // Initialize OpenGL parameters  
 void initialize() {
-	glClearColor(0., 1., 1., 1.);	//Background colour
+	glClearColor(1., 1., 1., 1.);	//Background colour
 	
-	loadTexture();
+	// loadTexture();
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
 	glEnable(GL_COLOR_MATERIAL);
 	glEnable(GL_NORMALIZE);
 
+}
+
+void idle() {
+	update();
+	glutPostRedisplay();
 }
 
 // Main: Initialize glut window and register call backs 
@@ -130,7 +132,7 @@ int main(int argc, char **argv) {
 	initialize();
 
 	glutDisplayFunc(display);
-	// glutSpecialFunc(special);
+	glutIdleFunc(idle); 
 	glutKeyboardFunc(keyboard);
 	glutMainLoop();
 	return 0; 
