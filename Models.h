@@ -10,5 +10,7 @@
 //void pillar();
 
 void conveyor();
-void update();
-void loadTexture();
+
+void getDonut();
+
+void animate();

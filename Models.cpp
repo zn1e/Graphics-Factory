@@ -12,11 +12,13 @@
 #include <cmath>
 using namespace std;
 
+float donutPos = -5.;
+float speed = 0.0005;
+float white[3] = {1., 1., 1.};
 
 // Draw the conveyor belt
 void conveyor() {
     float gray[3] = {0.5, 0.5, 0.5};
-    float white[3] = {1., 1., 1.};
     float shininess[1] = {50.};
     float v[11] = {-5.,-4., -3., -2., -1., 0, 1., 2., 3., 4., 5.}; // vertices of V
     int n = 11; // max length of vertices
@@ -26,8 +28,7 @@ void conveyor() {
     glLightfv(GL_LIGHT0, GL_DIFFUSE, white);
     glLightfv(GL_LIGHT0, GL_SPECULAR, white);
 
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, gray);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, gray);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, gray);
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, white);
     glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, shininess);
 
@@ -42,4 +43,29 @@ void conveyor() {
     }
 
     glEnd();
+}
+
+void getDonut() {
+
+    float brown[3] = {0.55, 0.35, 0.07};
+    float shininess[1] = {80.};
+    float light[] = {0., 50., 0., 1.};
+
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, brown);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, white);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, shininess);
+
+    glPushMatrix();
+        glTranslatef(donutPos, -0.4, 0.5);
+        glRotatef(90, 0, 0, 1);
+        glRotatef(90, 0, 1, 0);
+        glutSolidTorus(.1, .3, 10, 20);
+    glPopMatrix();
+
+}
+
+// Animate objects
+void animate() {
+    donutPos += speed;
+    if (donutPos >= 5.0f) donutPos = -5.0f;
 }

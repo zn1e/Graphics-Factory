@@ -21,7 +21,7 @@ using namespace std;
 struct Camera {
 	float x, y, z; // position
 	float yaw, pitch; // rotation
-} camera = {0, 0, 15, 0, 0}; // initial cam position
+} camera = {0, 1, 15, 0, 0}; // initial cam position
 bool toggle_wireframe = 0;
 
 // Restrict camera pitch
@@ -71,11 +71,11 @@ void mouseMotion(int x, int y) {
 
 //-- Draw a floor plane ----------------------------------------------------
 void floor() {
-	float floorColor[3] = {0., 0., 0.};
-	float floorShininess[1] = {10.0};
-	
-	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, floorColor);
-	glMaterialfv(GL_FRONT, GL_SHININESS, floorShininess);
+	float white[4] = {1., 1., 1., 1.};
+	float black[4] = {0., 0., 0., 1.};
+	glColor4f(0.7, 0.7, 0.7, 1.0);
+	glNormal3f(0.0, 1.0, 0.0);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, black);
 
 	for(int i = -50; i <= 50; i++)  {
 		glBegin(GL_LINES);      //A set of grid lines on the xz-plane
@@ -85,7 +85,16 @@ void floor() {
 			glVertex3f(i, -0.75,  50.);
 		glEnd();
 	}
+
+	glMaterialfv(GL_FRONT, GL_SPECULAR, white);
 }
+
+// Continuously update animation in idle
+void idle() {
+	animate();
+	glutPostRedisplay();
+}
+
 
 // Main display module that generates the scene.
 void display() {
@@ -109,6 +118,7 @@ void display() {
 
 	glEnable(GL_LIGHTING);
 	conveyor();
+	getDonut();
 
 	glutSwapBuffers();
 }
@@ -117,7 +127,7 @@ void display() {
 void initialize() {
 	// loadTexture();
 
-	glClearColor(1., 1., 1., 1.);	//Background colour
+	glClearColor(1., 1., 1, 1.);	//Background colour
 	
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_DEPTH_TEST);
@@ -140,6 +150,7 @@ int main(int argc, char **argv) {
 	glutDisplayFunc(display);
 	glutKeyboardFunc(keyboard);
 	glutPassiveMotionFunc(mouseMotion);
+	glutIdleFunc(idle);
 	glutMainLoop();
 	return 0; 
 }
