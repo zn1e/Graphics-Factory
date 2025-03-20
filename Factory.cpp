@@ -15,62 +15,67 @@
 
 using namespace std;
 
-#define TO_RADIANS 3.14159/180.
+#define TO_RADIANS M_PI/180.
 
-GLuint txId[2]; // texture ids
 
-// Define global variables
-float eye_x=0, eye_z=15, look_x=0, look_z=0., angle = 0; // camera params
+struct Camera {
+	float x, y, z; // position
+	float yaw, pitch; // rotation
+} camera = {0, 0, 15, 0, 0}; // initial cam position
 bool toggle_wireframe = 0;
 
-//Load and bind textures
-void loadTexture() {
-	glGenTextures(2, txId); // Create 2 texture ids
-
-	glBindTexture(GL_TEXTURE_2D, txId[0]);	//Use this texture
-	loadTGA("floor.tga");
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);	//Set texture parameters
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);	
-
-	glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
+// Restrict camera pitch
+void clampPitch(float &pitch) {
+	if (pitch > 90.) pitch = 90.;
+	if (pitch < -90.) pitch = -90.;
 }
 
+// Update camera position based on movement direction
+void moveCamera(float speed) {
+	camera.x += speed * sin(camera.yaw * TO_RADIANS);
+	camera.z -= speed * cos(camera.yaw * TO_RADIANS);
+}
 
 // Keyboard key event call back
 void keyboard(unsigned char key, int x, int y) {
 	switch (key)
 	{
-		case 'a': angle -= 5; break; // turn direction
-		case 'd': angle += 5; break;
-		case 's': // move backward
-			eye_x -= 0.1 * sin(angle * TO_RADIANS);
-			eye_z += 0.1 * cos(angle * TO_RADIANS);
+		case 'a': camera.yaw -= 5; break; // rotate left
+		case 'd': camera.yaw += 5; break; // rotate right
+		case 's': moveCamera(-0.2); break; // move backward
+		case 'w': moveCamera(0.2); break; // move forward
+		case 'q': // toggle wireframe
+			toggle_wireframe = !toggle_wireframe;
+			glPolygonMode(GL_FRONT_AND_BACK, toggle_wireframe ? GL_LINE: GL_FILL);
 			break;
-		case 'w': // move forward
-			eye_x += 0.1 * sin(angle * TO_RADIANS);
-			eye_z -= 0.1 * cos(angle * TO_RADIANS);
-			break;
-		case 'q':
-			if (!toggle_wireframe) {
-				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-				toggle_wireframe = 1;
-				break;
-			} else {
-				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-				toggle_wireframe = 0;
-				break;
-			}
 	}
 
-	look_x = eye_x + 100 * sin(angle * TO_RADIANS);
-	look_z = eye_z - 100 * cos(angle * TO_RADIANS);
 	glutPostRedisplay();
 }
 
+// Mouse motion callback for looking up/down
+void mouseMotion(int x, int y) {
+	static int lastX = x, lastY = y; // to store the previous motion
+	float sensitivity = 0.01;
+
+	camera.yaw += (x - lastX) * sensitivity;
+	camera.pitch -= (y - lastY) * sensitivity;
+	clampPitch(camera.pitch);
+
+	lastX = x;
+	lastY = y;
+
+	glutPostRedisplay();
+}
+
+
 //-- Draw a floor plane ----------------------------------------------------
 void floor() {
-
-	glColor3f(0., 0.5, 0.);     //Floor colour
+	float floorColor[3] = {0., 0., 0.};
+	float floorShininess[1] = {10.0};
+	
+	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, floorColor);
+	glMaterialfv(GL_FRONT, GL_SHININESS, floorShininess);
 
 	for(int i = -50; i <= 50; i++)  {
 		glBegin(GL_LINES);      //A set of grid lines on the xz-plane
@@ -92,12 +97,16 @@ void display() {
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	gluLookAt(eye_x, 0., eye_z, look_x, 0., look_z, 0., 1., 0.);
+	
+	float lookX = camera.x + cos(camera.pitch * TO_RADIANS) * sin(camera.yaw * TO_RADIANS);
+	float lookY = camera.y + sin(camera.pitch * TO_RADIANS);
+	float lookZ = camera.z - cos(camera.pitch * TO_RADIANS) * cos(camera.yaw * TO_RADIANS);
 
+	gluLookAt(camera.x, camera.y, camera.z, lookX, lookY, lookZ, 0., 1., 0.);
+	
 	glDisable(GL_LIGHTING);
-	// floor();
+	//floor();
 
-	// pillar();
 	glEnable(GL_LIGHTING);
 	conveyor();
 
@@ -106,20 +115,17 @@ void display() {
 
 // Initialize OpenGL parameters  
 void initialize() {
+	// loadTexture();
+
 	glClearColor(1., 1., 1., 1.);	//Background colour
 	
-	// loadTexture();
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
 	glEnable(GL_COLOR_MATERIAL);
 	glEnable(GL_NORMALIZE);
 
-}
-
-void idle() {
-	update();
-	glutPostRedisplay();
 }
 
 // Main: Initialize glut window and register call backs 
@@ -129,11 +135,11 @@ int main(int argc, char **argv) {
 	glutInitWindowSize(1280, 720);
 	glutInitWindowPosition((glutGet(GLUT_SCREEN_WIDTH) - 1280)/2, (glutGet(GLUT_SCREEN_HEIGHT) - 480)/2); // center window with 1280 x 480 size
 	glutCreateWindow("Graphics Factory");
+	
 	initialize();
-
 	glutDisplayFunc(display);
-	glutIdleFunc(idle); 
 	glutKeyboardFunc(keyboard);
+	glutPassiveMotionFunc(mouseMotion);
 	glutMainLoop();
 	return 0; 
 }
