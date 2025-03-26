@@ -22,6 +22,7 @@ struct Camera {
 	float x, y, z; // position
 	float yaw, pitch; // rotation
 } camera = {0, 1, 15, 0, 0}; // initial cam position
+
 bool toggle_wireframe = 0;
 
 // Restrict camera pitch
@@ -46,7 +47,13 @@ void keyboard(unsigned char key, int x, int y) {
 		case 'w': moveCamera(0.2); break; // move forward
 		case 'q': // toggle wireframe
 			toggle_wireframe = !toggle_wireframe;
-			glPolygonMode(GL_FRONT_AND_BACK, toggle_wireframe ? GL_LINE: GL_FILL);
+			if (toggle_wireframe) {
+				glDisable(GL_LIGHTING);
+				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			} else {
+				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+				glEnable(GL_LIGHTING);
+			}
 			break;
 	}
 
