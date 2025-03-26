@@ -51,8 +51,8 @@ void keyboard(unsigned char key, int x, int y) {
 				glDisable(GL_LIGHTING);
 				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			} else {
-				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 				glEnable(GL_LIGHTING);
+				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 			}
 			break;
 	}
@@ -105,25 +105,24 @@ void idle() {
 
 // Main display module that generates the scene.
 void display() {
+	float lpos[4] = {100., 100., 100., 1.}; // light's position
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
-
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(45., 1., 1., 500.);  //The camera view volume  
-
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	
+
 	float lookX = camera.x + cos(camera.pitch * TO_RADIANS) * sin(camera.yaw * TO_RADIANS);
 	float lookY = camera.y + sin(camera.pitch * TO_RADIANS);
 	float lookZ = camera.z - cos(camera.pitch * TO_RADIANS) * cos(camera.yaw * TO_RADIANS);
 
 	gluLookAt(camera.x, camera.y, camera.z, lookX, lookY, lookZ, 0., 1., 0.);
-	
+	glLightfv(GL_LIGHT0, GL_POSITION, lpos);
+
 	glDisable(GL_LIGHTING);
 	//floor();
-
+	
 	glEnable(GL_LIGHTING);
+	pillars();
 	conveyor();
 	getDonut();
 
@@ -143,6 +142,9 @@ void initialize() {
 	glEnable(GL_COLOR_MATERIAL);
 	glEnable(GL_NORMALIZE);
 
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(45., 1., 1., 500.);  //The camera view volume  
 }
 
 // Main: Initialize glut window and register call backs 

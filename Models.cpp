@@ -38,13 +38,51 @@ void conveyor() {
     for (int i = 0; i < n; i++) 
     {
         glNormal3f(0, 1, 0); // normal pointing upward
-        
         glVertex3f(v[i], height, 0);
         glVertex3f(v[i], height, w);
     }
 
     glEnd();
 }
+
+// Draw the pillars
+void pillars() {
+
+    // front-left pillar
+    glPushMatrix();
+        glColor3f(0.2, 0.2, 0.2);
+        glTranslatef(-5., 3., 0.5);
+        glScalef(0.5, 10., 1.4);
+        glutSolidCube(1.);
+    glPopMatrix();
+
+    // front-right pillar
+    glPushMatrix();
+        glColor3f(0.2, 0.2, 0.2);
+        glTranslatef(5., 3., 0.5);
+        glScalef(0.5, 10., 1.4);
+        glutSolidCube(1.);
+    glPopMatrix();
+
+    // back-left pillar
+    glPushMatrix();
+        glColor3f(0.2, 0.2, 0.2);
+        glTranslatef(-5, 3., -20.);
+        glScalef(0.5, 10., 1.4);
+        glutSolidCube(1.);
+    glPopMatrix();
+
+
+    // back-right pillar
+    glPushMatrix();
+        glColor3f(0.2, 0.2, 0.2);
+        glTranslatef(5., 3., -20.);
+        glScalef(0.5, 10., 1.4);
+        glutSolidCube(1.);
+    glPopMatrix();
+
+}
+
 
 void getDonut() {
 

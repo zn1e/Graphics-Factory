@@ -13,4 +13,6 @@ void conveyor();
 
 void getDonut();
 
+void pillars();
+
 void animate();
