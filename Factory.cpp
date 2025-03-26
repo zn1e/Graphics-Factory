@@ -123,6 +123,7 @@ void display() {
 	
 	glEnable(GL_LIGHTING);
 	pillars();
+	cylinder();
 	conveyor();
 	getDonut();
 

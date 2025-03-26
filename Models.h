@@ -15,4 +15,6 @@ void getDonut();
 
 void pillars();
 
+void cylinder();
+
 void animate();
