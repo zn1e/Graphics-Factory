@@ -11,10 +11,12 @@
 
 void conveyor();
 
-void getDonut();
+void getBox();
 
 void pillars();
 
 void cylinder();
+
+void spinFan();
 
 void animate();

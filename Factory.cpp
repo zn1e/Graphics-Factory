@@ -27,8 +27,8 @@ bool toggle_wireframe = 0;
 
 // Restrict camera pitch
 void clampPitch(float &pitch) {
-	if (pitch > 90.) pitch = 90.;
-	if (pitch < -90.) pitch = -90.;
+	if (pitch > 120.) pitch = 120.;
+	if (pitch < -120.) pitch = -120.;
 }
 
 // Update camera position based on movement direction
@@ -125,7 +125,8 @@ void display() {
 	pillars();
 	cylinder();
 	conveyor();
-	getDonut();
+	getBox();
+	spinFan();
 
 	glutSwapBuffers();
 }

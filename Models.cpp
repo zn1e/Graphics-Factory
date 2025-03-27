@@ -12,7 +12,8 @@
 #include <cmath>
 using namespace std;
 
-float donutPos = -5.;
+float boxPos = -5.;
+float fanAngle = 0.;
 float speed = 0.0005;
 float white[3] = {1., 1., 1.};
 
@@ -84,26 +85,78 @@ void cylinder() {
         glTranslatef(-5., 6.5, 0.);
         glRotatef(90., 0., 1., 0.);
         gluCylinder(q, 0.5, 0.5, 10., 10, 10.);
+    glPopMatrix(); 
+
+    // draw the cylinder for hanging fan
+    glPushMatrix();
+        gluQuadricDrawStyle(q, GLU_FILL);
+        glTranslatef(0., 4.5, 0.);
+        glRotatef(90, 0., 0., 1.);
+        glRotatef(90., 0., 1., 0.);
+        gluCylinder(q, 0.1, 0.1, 2., 10, 10.);
+    glPopMatrix(); 
+
+}
+
+// Draw fan blades
+void drawBlade() {
+    glBegin(GL_QUADS);
+        glVertex2f(-0.05, 0.1);
+        glVertex2f(0.05, 0.1);
+        glVertex2f(0.15, 0.6);
+        glVertex2f(-0.15, 0.6);
+    glEnd();
+}
+
+// Draw the fan
+void drawFan() {
+    glPushMatrix();
+        glColor3f(1., 0., 0.);
+        for (int i = 0; i < 3; i++) {
+            glPushMatrix();
+                glRotatef(90, 1., 0., 0.); // rotate around x axis so it is positioned correctly
+                glRotatef(i * 120, 0., 0., 1.); // even out the spacing between blades
+                drawBlade();
+            glPopMatrix();
+        }
     glPopMatrix();
-    
 }
 
 
-void getDonut() {
+// Get the box in conveyor
+void getBox() {
 
     glPushMatrix();
         glColor3f(0.55, 0.35, 0.07);
-        glTranslatef(donutPos, -0.4, 0.5);
-        glRotatef(90, 0, 0, 1);
-        glRotatef(90, 0, 1, 0);
-        //glScalef(1., 1., 1.);
-        glutSolidTorus(.1, .3, 20, 20);
+        glTranslatef(boxPos, 0., 0.5);
+        glScalef(0.5, 1., 0.5);
+        glutSolidCube(1.);
     glPopMatrix();
 
 }
 
+// Rotate the fan in a pivot
+void spinFan() {
+
+    glPushMatrix();
+        glTranslatef(0., 4.5, 0);
+
+        glPushMatrix();
+            glRotatef(fanAngle, 0., 1., 0.);
+            drawFan();
+        glPopMatrix();
+            
+    glPopMatrix();
+
+}
+
+
 // Animate objects
 void animate() {
-    donutPos += speed;
-    if (donutPos >= 5.0f) donutPos = -5.0f;
+    boxPos += speed;
+    fanAngle += 1.;
+
+    if (boxPos >= 5.0f) boxPos = -5.0f;
+
+    if (fanAngle > 360) fanAngle -= 360;
 }
