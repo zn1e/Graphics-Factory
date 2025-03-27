@@ -10,7 +10,6 @@
 #include <iostream>
 #include <cmath>
 #include <GL/freeglut.h>
-#include "loadTGA.h"
 #include "Models.h"
 
 using namespace std;
@@ -105,9 +104,15 @@ void idle() {
 
 // Main display module that generates the scene.
 void display() {
-	float lpos[4] = {100., 100., 100., 1.}; // light's position
+	float lpos[4] = {0., 50., 0., 1.}; // light's position
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
+
+	glColor3f(1., 1., 1.);
+	glEnable(GL_TEXTURE_2D);
+
+	drawSkySphere(50.);
+
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
@@ -117,15 +122,22 @@ void display() {
 
 	gluLookAt(camera.x, camera.y, camera.z, lookX, lookY, lookZ, 0., 1., 0.);
 	glLightfv(GL_LIGHT0, GL_POSITION, lpos);
-
-	glDisable(GL_LIGHTING);
-	//floor();
 	
 	glEnable(GL_LIGHTING);
+
+	//glColor3f(1., 1., 1.);
 	pillars();
+
+	//glColor3f(1., 1., 1.);
 	cylinder();
+
+	//glColor3f(0.55, 0.35, 0.07);
 	conveyor();
+
+	//glColor3f(0.55, 0.35, 0.07);
 	getBox();
+
+	//glColor3f(1., 0., 0.);
 	spinFan();
 
 	glutSwapBuffers();
@@ -133,7 +145,7 @@ void display() {
 
 // Initialize OpenGL parameters  
 void initialize() {
-	// loadTexture();
+	loadTexture();
 
 	glClearColor(1., 1., 1, 1.);	//Background colour
 	

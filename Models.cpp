@@ -10,12 +10,32 @@
 #include <iostream>
 #include <GL/freeglut.h>
 #include <cmath>
+#include "loadBMP.h"
 using namespace std;
 
 float boxPos = -5.;
 float fanAngle = 0.;
 float speed = 0.0005;
 float white[3] = {1., 1., 1.};
+
+GLuint txId[4];
+
+// Load textures
+void loadTexture() {
+    glEnable(GL_TEXTURE_2D);
+	glGenTextures(4, txId);   //Get 2 texture IDs 
+
+	glBindTexture(GL_TEXTURE_2D, txId[0]);  //Use this texture name for the following OpenGL texture
+	loadBMP("pillar.bmp");
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);	// Linear Filtering
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
+    glBindTexture(GL_TEXTURE_2D, txId[1]);  //Use this texture name for the following OpenGL texture
+	loadBMP("background.bmp");
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);	// Linear Filtering
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	
+}
 
 // Draw the conveyor belt
 void conveyor() {
@@ -41,37 +61,37 @@ void conveyor() {
 void pillars() {
 
     // front-left pillar
+    glBindTexture(GL_TEXTURE_2D, txId[0]);
     glPushMatrix();
-        glColor3f(0.2, 0.2, 0.2);
         glTranslatef(-5., 3., 0.5);
         glScalef(0.5, 10., 1.4);
         glutSolidCube(1.);
     glPopMatrix();
 
     // front-right pillar
+    glBindTexture(GL_TEXTURE_2D, txId[0]);
     glPushMatrix();
-        glColor3f(0.2, 0.2, 0.2);
         glTranslatef(5., 3., 0.5);
         glScalef(0.5, 10., 1.4);
         glutSolidCube(1.);
     glPopMatrix();
 
     // back-left pillar
-    glPushMatrix();
-        glColor3f(0.2, 0.2, 0.2);
-        glTranslatef(-5, 3., -20.);
-        glScalef(0.5, 10., 1.4);
-        glutSolidCube(1.);
-    glPopMatrix();
+//    glPushMatrix();
+//        glColor3f(0.2, 0.2, 0.2);
+//        glTranslatef(-5, 3., -20.);
+//        glScalef(0.5, 10., 1.4);
+ //       glutSolidCube(1.);
+ //   glPopMatrix();
 
 
     // back-right pillar
-    glPushMatrix();
-        glColor3f(0.2, 0.2, 0.2);
-        glTranslatef(5., 3., -20.);
-        glScalef(0.5, 10., 1.4);
-        glutSolidCube(1.);
-    glPopMatrix();
+//    glPushMatrix();
+//        glColor3f(0.2, 0.2, 0.2);
+ //       glTranslatef(5., 3., -20.);
+//        glScalef(0.5, 10., 1.4);
+//        glutSolidCube(1.);
+ //   glPopMatrix();
 
 }
 
@@ -81,6 +101,7 @@ void cylinder() {
     q = gluNewQuadric();
 
     glPushMatrix();
+        glColor3f(0.5, 0.5, 0.5);
         gluQuadricDrawStyle(q, GLU_FILL);
         glTranslatef(-5., 6.5, 0.);
         glRotatef(90., 0., 1., 0.);
@@ -89,6 +110,7 @@ void cylinder() {
 
     // draw the cylinder for hanging fan
     glPushMatrix();
+        glColor3f(0.5, 0.5, 0.5);
         gluQuadricDrawStyle(q, GLU_FILL);
         glTranslatef(0., 4.5, 0.);
         glRotatef(90, 0., 0., 1.);
@@ -145,10 +167,31 @@ void spinFan() {
             glRotatef(fanAngle, 0., 1., 0.);
             drawFan();
         glPopMatrix();
-            
+
     glPopMatrix();
 
 }
+
+void drawSkySphere(float radius) {
+
+    GLUquadric *q = gluNewQuadric();
+    gluQuadricTexture(q, GL_TRUE);
+
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, txId[1]); // Bind sky texture
+
+    glPushMatrix();
+        glRotatef(90., 0., 1., 0);
+        glRotatef(-90, 1.0, 0.0, 0.0); // Rotate the sphere so that poles align with top and bottom
+        gluSphere(q, 50.0, 36, 18); // Create sphere with a reasonable resolution
+    glPopMatrix();
+
+    glDisable(GL_TEXTURE_2D);
+    gluDeleteQuadric(q);
+    
+}
+
+
 
 
 // Animate objects

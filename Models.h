@@ -9,6 +9,8 @@
 
 //void pillar();
 
+void loadTexture();
+
 void conveyor();
 
 void getBox();
@@ -18,5 +20,7 @@ void pillars();
 void cylinder();
 
 void spinFan();
+
+void drawSkySphere(float radius);
 
 void animate();
