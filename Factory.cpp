@@ -143,6 +143,8 @@ void display() {
 
 	boxWithShadow();
 
+	drawTank();
+
 	glutSwapBuffers();
 }
 

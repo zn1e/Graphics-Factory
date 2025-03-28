@@ -26,3 +26,5 @@ void drawSkySphere(float radius);
 void boxWithShadow();
 
 void animate();
+
+void drawTank();
