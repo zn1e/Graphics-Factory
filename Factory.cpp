@@ -20,7 +20,7 @@ using namespace std;
 struct Camera {
 	float x, y, z; // position
 	float yaw, pitch; // rotation
-} camera = {0, 1, 15, 0, 0}; // initial cam position
+} camera = {0, 1, 20, 0, 0}; // initial cam position
 
 bool toggle_wireframe = 0;
 
@@ -104,7 +104,7 @@ void idle() {
 
 // Main display module that generates the scene.
 void display() {
-	float lpos[4] = {0., 50., 0., 1.}; // light's position
+	float lpos[4] = {5., 50., 5., 1.}; // light's position
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
 
@@ -124,6 +124,7 @@ void display() {
 	glLightfv(GL_LIGHT0, GL_POSITION, lpos);
 	
 	glEnable(GL_LIGHTING);
+	
 
 	//glColor3f(1., 1., 1.);
 	pillars();
@@ -140,6 +141,8 @@ void display() {
 	//glColor3f(1., 0., 0.);
 	spinFan();
 
+	boxWithShadow();
+
 	glutSwapBuffers();
 }
 
@@ -153,6 +156,7 @@ void initialize() {
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
+	glEnable(GL_LIGHT1);
 	glEnable(GL_COLOR_MATERIAL);
 	glEnable(GL_NORMALIZE);
 

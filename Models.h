@@ -23,4 +23,6 @@ void spinFan();
 
 void drawSkySphere(float radius);
 
+void boxWithShadow();
+
 void animate();

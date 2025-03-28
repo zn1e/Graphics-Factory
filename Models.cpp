@@ -15,15 +15,17 @@ using namespace std;
 
 float boxPos = -5.;
 float fanAngle = 0.;
+float conveyorOffset = 0.;
 float speed = 0.0005;
 float white[3] = {1., 1., 1.};
+
 
 GLuint txId[4];
 
 // Load textures
 void loadTexture() {
     glEnable(GL_TEXTURE_2D);
-	glGenTextures(4, txId);   //Get 2 texture IDs 
+	glGenTextures(2, txId);   //Get 2 texture IDs 
 
 	glBindTexture(GL_TEXTURE_2D, txId[0]);  //Use this texture name for the following OpenGL texture
 	loadBMP("pillar.bmp");
@@ -76,23 +78,6 @@ void pillars() {
         glutSolidCube(1.);
     glPopMatrix();
 
-    // back-left pillar
-//    glPushMatrix();
-//        glColor3f(0.2, 0.2, 0.2);
-//        glTranslatef(-5, 3., -20.);
-//        glScalef(0.5, 10., 1.4);
- //       glutSolidCube(1.);
- //   glPopMatrix();
-
-
-    // back-right pillar
-//    glPushMatrix();
-//        glColor3f(0.2, 0.2, 0.2);
- //       glTranslatef(5., 3., -20.);
-//        glScalef(0.5, 10., 1.4);
-//        glutSolidCube(1.);
- //   glPopMatrix();
-
 }
 
 // Draw the cylinder between pillars
@@ -103,7 +88,7 @@ void cylinder() {
     glPushMatrix();
         glColor3f(0.5, 0.5, 0.5);
         gluQuadricDrawStyle(q, GLU_FILL);
-        glTranslatef(-5., 6.5, 0.);
+        glTranslatef(-5., 6.5, 0.5);
         glRotatef(90., 0., 1., 0.);
         gluCylinder(q, 0.5, 0.5, 10., 10, 10.);
     glPopMatrix(); 
@@ -112,12 +97,13 @@ void cylinder() {
     glPushMatrix();
         glColor3f(0.5, 0.5, 0.5);
         gluQuadricDrawStyle(q, GLU_FILL);
-        glTranslatef(0., 4.5, 0.);
+        glTranslatef(0., 4.5, 0.5);
         glRotatef(90, 0., 0., 1.);
         glRotatef(90., 0., 1., 0.);
         gluCylinder(q, 0.1, 0.1, 2., 10, 10.);
     glPopMatrix(); 
 
+    gluDeleteQuadric(q);
 }
 
 // Draw fan blades
@@ -144,6 +130,28 @@ void drawFan() {
     glPopMatrix();
 }
 
+// Draw the spotlight
+void drawSpotlight() {
+    GLUquadric *q = gluNewQuadric();
+
+    // spotlight body
+    glPushMatrix();
+        glColor3f(0.3, 0.3, 0.3);
+         // position on left pillar
+        //glRotatef(spotlightAngle, 0., 1., 0.);
+        glTranslatef(-4.2, 5.5, 0.5);
+        glRotatef(-90., 0., 1., 0.);
+        glRotatef(-45, 1., 0., 0.); // tilt downward
+
+        gluCylinder(q, 0.1, 0.05, 0.5, 20, 20); // body
+
+        gluDisk(q, 0., 0.1, 20., 1); // lens
+
+    glPopMatrix();
+
+    gluDeleteQuadric(q);
+}
+
 
 // Get the box in conveyor
 void getBox() {
@@ -161,7 +169,7 @@ void getBox() {
 void spinFan() {
 
     glPushMatrix();
-        glTranslatef(0., 4.5, 0);
+        glTranslatef(0., 4.5, 0.5);
 
         glPushMatrix();
             glRotatef(fanAngle, 0., 1., 0.);
@@ -188,18 +196,62 @@ void drawSkySphere(float radius) {
 
     glDisable(GL_TEXTURE_2D);
     gluDeleteQuadric(q);
-    
+
 }
 
+// Draw boxes with planar shadows
+void boxWithShadow() {
+    float light[4] = {5., 10., 5., 1};
+    float shadowMat[16] = {light[1], 0, 0, 0, 
+                        -light[0], 0, -light[2], -1, 
+                        0, 0, light[1], 0, 
+                        0, 0, 0, light[1]};
+    glLightfv(GL_LIGHT0, GL_POSITION, light);
 
+    glEnable(GL_LIGHTING);
+    // floating box
+    glPushMatrix();
+        glColor3f(0.55, 0.35, 0.07);
+        glTranslatef(5, 0.5, 8);
+        glScalef(0.5, 1., 0.5);
+        glutSolidCube(1.);
+    glPopMatrix();
+
+    glPushMatrix();
+        glColor3f(0.55, 0.35, 0.07);
+        glTranslatef(5, -1, 10);
+        glScalef(0.5, 1., 0.5);
+        glutSolidCube(1.);
+    glPopMatrix();
+
+    glDisable(GL_LIGHTING);
+    glColor3f(0.2, 0.2, 0.2); // shadow
+
+    glPushMatrix();
+        glTranslatef(5, -2, 8);
+        glMultMatrixf(shadowMat);
+        glScalef(0.5, 1., 0.5);
+        glutSolidCube(1.);
+    glPopMatrix();
+
+    glPushMatrix();
+        glTranslatef(5, -2, 10);
+        glMultMatrixf(shadowMat);
+        glScalef(0.5, 1., 0.5);
+        glutSolidCube(1.);
+    glPopMatrix();
+
+}
 
 
 // Animate objects
 void animate() {
     boxPos += speed;
     fanAngle += 1.;
+    
 
     if (boxPos >= 5.0f) boxPos = -5.0f;
 
     if (fanAngle > 360) fanAngle -= 360;
+
 }
